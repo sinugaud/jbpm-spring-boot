@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: jbpm-spring-boot-service
+spec:
+  selector:
+    app: jbpm-spring-boot
+  ports:
+    - protocol: TCP
+      port: 8090
+      targetPort: 8090
+  type: ClusterIP
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jbpm-spring-boot-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: jbpm-spring-boot
+  template:
+    metadata:
+      labels:
+        app: jbpm-spring-boot
+    spec:
+      containers:
+        - name: jbpm-spring-boot
+          image: sinugaud/jbpm-spring-boot-service:1.0-SNAPSHOT
+          ports:
+            - containerPort: 8090
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "postgres"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "jbpm"
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: "jbpm"
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://postgres-service:5432/jbpm"
+            - name: SPRING_DATASOURCE_DRIVER_CLASS_NAME
+              value: "org.postgresql.Driver"
+
